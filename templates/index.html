@@ -35,7 +35,7 @@
           }
 
           const data = await response.json();
-          resultContainer.textContent = `Short URL: http://localhost:8000/${data.short_link}`;
+          resultContainer.textContent = `Short URL: https://ishort.onrender.com/${data.short_link}`;
         } catch (error) {
           console.error("Error:", error);
           resultContainer.textContent = `Error: ${error.message}`;
