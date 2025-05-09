@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Link Shortener</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      async function generateShortLink() {
+        const longLink = document.getElementById("longLinkInput").value;
+        const generateButton = document.querySelector("button");
+        const resultContainer = document.getElementById("resultContainer");
+        resultContainer.textContent = "";
+
+        if (!longLink) {
+          resultContainer.textContent = "Please enter a valid URL.";
+          return;
+        }
+
+        generateButton.disabled = true;
+        generateButton.textContent = "Generating...";
+
+        try {
+          const response = await fetch(
+            `/shorten/${encodeURIComponent(longLink)}`,
+            {
+              method: "POST",
+              cache: "no-store",
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          resultContainer.textContent = `Short URL: http://localhost:8000/${data.short_link}`;
+        } catch (error) {
+          console.error("Error:", error);
+          resultContainer.textContent = `Error: ${error.message}`;
+        } finally {
+          generateButton.disabled = false;
+          generateButton.textContent = "Generate";
+        }
+      }
+    </script>
+  </head>
+
+  <body
+    class="bg-gray-100 min-h-screen flex flex-col justify-center items-center"
+  >
+    <h1 class="text-5xl font-bold text-center mb-10 text-indigo-700">
+      Link Shortener
+    </h1>
+
+    <div class="w-full max-w-md px-4">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input
+          id="longLinkInput"
+          type="text"
+          placeholder="Enter your long URL here..."
+          class="flex-grow px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
+        <button
+          onclick="generateShortLink()"
+          class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all shadow"
+        >
+          Generate
+        </button>
+      </div>
+      <div
+        id="resultContainer"
+        class="mt-4 text-lg font-semibold bg-green-200 rounded-md p-2 w-full"
+      >
+        Enter link above
+      </div>
+    </div>
+
+    <div class="w-full max-w-3xl mt-10 px-4">
+      <h2 class="text-2xl font-semibold mb-4 text-gray-700">
+        Last 3 Generated Links
+      </h2>
+      <div class="overflow-x-auto bg-white shadow rounded-lg">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Short Link
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Long Link
+              </th>
+            </tr>
+          </thead>
+          <tbody id="linksTableBody" class="bg-white divide-y divide-gray-200">
+            {% for item in responseObj %}
+            <tr>
+              <td class="px-6 py-4 text-indigo-600 hover:underline">
+                <a href="{{ item.short_link }}" target="_blank"
+                  >{{ item.short_link }}</a
+                >
+              </td>
+              <td class="px-6 py-4 break-all">{{ item.long_link }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>
